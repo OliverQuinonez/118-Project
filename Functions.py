@@ -65,13 +65,17 @@ def ReJ3(z,z0,dk,params): # Returns the integral of the real part of J_3 from bo
     #dk is phase mismatch, delta k
     b= params['b']
     Ref = lambda x: (1/(1+ (2*x/b)**2)**2) * ((1-(2*x/b)**2) *np.cos(dk*x) + (2*(2*x/b))*np.sin(dk*x))
-    return scint.quad(Ref,z0,z)
+    I = scint.quad(Ref,z0,z)
+    #print('ReJ3Value: ', I[0], 'Error estimate: ', I[1])
+    return I
 
 def ImJ3(z,z0,dk,params):# Returns the integral of the real part of J_3 from boyd 2.10.3\
     #dk is phase mismatch, delta k
     b= params['b']
     Imf = lambda x: (1/(1+(2*x/b)**2)**2) * ((1-(2*x/b)**2)*np.sin(dk*x) - (2*(2*x/b))*np.cos(dk*x))
-    return scint.quad(Imf,z0,z)
+    I = scint.quad(Imf,z0,z)
+    #print('ImJ3Value: ', I[0], 'Error estimate: ', I[1])
+    return I
     
 def phi3(z,z0,dk,params): #return the phase of the complex conjugate of J3
     return np.arctan2(-ImJ3(z,z0,dk,params)[0],ReJ3(z,z0,dk,params)[0])
