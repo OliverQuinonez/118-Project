@@ -64,21 +64,25 @@ def dAmplitude_355_dz(z, params):
 def ReJ3(z,z0,dk,params): # Returns the integral of the real part of J_3 from boyd 2.10.3
     #dk is phase mismatch, delta k
     b= params['b']
-    Ref = lambda x: (1/(1+ (2*x/b)**2)**2) * ((1-(2*x/b)**2) *np.cos(dk*x) + (2*(2*x/b))*np.sin(dk*x))
-    I = scint.quad(Ref,z0,z)
-    #print('ReJ3Value: ', I[0], 'Error estimate: ', I[1])
-    return I
+    Ref1 = lambda x: (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2) #times cos(dk*x)
+    Ref2 = lambda x: (1/(1+ (2*x/b)**2)**2) * (2*(2*x/b)) #times sin(dk*x)                                 
+    I1 = scint.quad(Ref1,z0,z,weight ='cos',wvar = dk)
+    I2 = scint.quad(Ref2,z0,z, weight = 'sin', wvar =dk)
+    Itot = I1[0]+I2[0]
+    return Itot
 
 def ImJ3(z,z0,dk,params):# Returns the integral of the real part of J_3 from boyd 2.10.3\
     #dk is phase mismatch, delta k
     b= params['b']
-    Imf = lambda x: (1/(1+(2*x/b)**2)**2) * ((1-(2*x/b)**2)*np.sin(dk*x) - (2*(2*x/b))*np.cos(dk*x))
-    I = scint.quad(Imf,z0,z)
-    #print('ImJ3Value: ', I[0], 'Error estimate: ', I[1])
-    return I
+    Imf1 = lambda x: (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2) #times sin(dk*x)
+    Imf2 = lambda x: (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b))) #times *np.cos(dk*x)) 
+    I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk)
+    I2 = scint.quad(Imf2,z0,z, weight = 'cos', wvar = dk)
+    Itot= I1[0]-I2[0]
+    return Itot
     
 def phi3(z,z0,dk,params): #return the phase of the complex conjugate of J3
-    return np.arctan2(-ImJ3(z,z0,dk,params)[0],ReJ3(z,z0,dk,params)[0])
+    return np.arctan2(-ImJ3(z,z0,dk,params),ReJ3(z,z0,dk,params))
 
 #########################################################################################################################
 
@@ -126,7 +130,7 @@ def solve_diff_eq(func, params, zrange, init_vals, z_eval,r_eval):
     
     for r in r_eval:
         sol = scint.solve_ivp(functools.partial(func, r, zstart+nonzero, params=params), 
-                              zrange, init_vals, t_eval=z_eval,method ='Radau') # seems like r problem was stiff
+                              zrange, init_vals, t_eval=z_eval,method ='Radau',rtol = 1e-5,atol = 1e-16) # seems like r problem was stiff
         beam_118_array[arr_index] = sol['y'][0]
         fluor_array[arr_index] = sol['y'][1]
         arr_index += 1
