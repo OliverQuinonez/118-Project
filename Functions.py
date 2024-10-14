@@ -80,9 +80,39 @@ def ImJ3(z,z0,dk,params):# Returns the integral of the real part of J_3 from boy
     I2 = scint.quad(Imf2,z0,z, weight = 'cos', wvar = dk,epsabs = 1e-6,epsrel=1e-6)
     Itot= I1[0]-I2[0]
     return Itot
-    
+
 def phi3(z,z0,dk,params): #return the phase of the complex conjugate of J3
     return np.arctan2(-ImJ3(z,z0,dk,params),ReJ3(z,z0,dk,params))
+
+def evalRef(x,dk,params):
+    b= params['b']
+    return (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2)* np.cos(dk*x)+(1/(1+ (2*x/b)**2)**2) * (2*(2*x/b))*np.sin(dk*x)
+def evalImf(x,dk,params):
+    b= params['b']
+    return (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2)*np.sin(dk*x) - (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b)))*np.cos(dk*x)
+
+def ReJ3_gauss_quad(z,z0,dk,params): # Returns the integral of the real part of J_3 from boyd 2.10.3
+    #dk is phase mismatch, delta k
+    b= params['b']
+    Ref1 = lambda x: (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2)* np.cos(dk*x) #times cos(dk*x)
+    Ref2 = lambda x: (1/(1+ (2*x/b)**2)**2) * (2*(2*x/b))*np.sin(dk*x) #times sin(dk*x)                                 
+    I1 = scint.quadrature(Ref1,z0,z, tol = 1e-10,rtol=1e-10,maxiter=500)
+    I2 = scint.quadrature(Ref2,z0,z, tol = 1e-10,rtol=1e-10,maxiter=500)
+    Itot = I1[0]+I2[0]
+    return Itot
+
+def ImJ3_gauss_quad(z,z0,dk,params):# Returns the integral of the real part of J_3 from boyd 2.10.3\
+    #dk is phase mismatch, delta k
+    b= params['b']
+    Imf1 = lambda x: (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2)*np.sin(dk*x) #times sin(dk*x)
+    Imf2 = lambda x: (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b)))*np.cos(dk*x) #times *np.cos(dk*x)) 
+    I1 = scint.quadrature(Imf1,z0,z, tol = 1e-10,rtol=1e-10,maxiter = 500)
+    I2 = scint.quadrature(Imf2,z0,z, tol = 1e-10,rtol=1e-10,maxiter=500)
+    Itot= I1[0]-I2[0]
+    return Itot
+    
+def phi3_gauss_quad(z,z0,dk,params): #return the phase of the complex conjugate of J3
+    return np.arctan2(-ImJ3_gauss_quad(z,z0,dk,params),ReJ3_gauss_quad(z,z0,dk,params))
 
 #########################################################################################################################
 
