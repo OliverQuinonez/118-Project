@@ -114,6 +114,9 @@ def ImJ3_gauss_quad(z,z0,dk,params):# Returns the integral of the real part of J
 def phi3_gauss_quad(z,z0,dk,params): #return the phase of the complex conjugate of J3
     return np.arctan2(-ImJ3_gauss_quad(z,z0,dk,params),ReJ3_gauss_quad(z,z0,dk,params))
 
+def phi3_gauss_quad_arctan1(z,z0,dk,params):
+    return np.arctan(-ImJ3_gauss_quad(z,z0,dk,params)/ReJ3_gauss_quad(z,z0,dk,params))
+
 #########################################################################################################################
 
 def dA118_dz_GBNA(r,z0,z,amplitudes,params):
