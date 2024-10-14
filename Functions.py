@@ -66,8 +66,8 @@ def ReJ3(z,z0,dk,params): # Returns the integral of the real part of J_3 from bo
     b= params['b']
     Ref1 = lambda x: (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2) #times cos(dk*x)
     Ref2 = lambda x: (1/(1+ (2*x/b)**2)**2) * (2*(2*x/b)) #times sin(dk*x)                                 
-    I1 = scint.quad(Ref1,z0,z,weight ='cos',wvar = dk)
-    I2 = scint.quad(Ref2,z0,z, weight = 'sin', wvar =dk)
+    I1 = scint.quad(Ref1,z0,z,weight ='cos',wvar = dk,epsabs = 1e-6,epsrel=1e-6)
+    I2 = scint.quad(Ref2,z0,z, weight = 'sin', wvar =dk,epsabs = 1e-6,epsrel=1e-6)
     Itot = I1[0]+I2[0]
     return Itot
 
@@ -76,8 +76,8 @@ def ImJ3(z,z0,dk,params):# Returns the integral of the real part of J_3 from boy
     b= params['b']
     Imf1 = lambda x: (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2) #times sin(dk*x)
     Imf2 = lambda x: (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b))) #times *np.cos(dk*x)) 
-    I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk)
-    I2 = scint.quad(Imf2,z0,z, weight = 'cos', wvar = dk)
+    I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk,epsabs = 1e-6,epsrel=1e-6)
+    I2 = scint.quad(Imf2,z0,z, weight = 'cos', wvar = dk,epsabs = 1e-6,epsrel=1e-6)
     Itot= I1[0]-I2[0]
     return Itot
     
@@ -96,7 +96,7 @@ def dA118_dz_GBNA(r,z0,z,amplitudes,params):
     
     dA_118_dz = (1/2)*chi3*PXe*k118 * (amplitude_355(r,z,params)**3) \
     * np.cos((2*z/b)-2*np.arctan2(2*z/b,1)+phi3(z,z0,2/b,params))\
-     -(dBeam_radius_dz(z, params)/beam_radius(z,params))*(1-((6*r**2)/(beam_radius(z,params))**2))*A_118
+     +(dBeam_radius_dz(z, params)/beam_radius(z,params))*(((6*r**2)/(beam_radius(z,params))**2)-2)*A_118
    
     dA_fluo_dz = 0
     
