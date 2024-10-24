@@ -41,18 +41,28 @@ nonzero = 1e-10
 
 #########################################################################################################################
 
+def evalOmega0(params):
+    b = params['b']
+    return np.sqrt(lambda_355 * b / (2* np.pi))
+
+def evalDeltaK(params):
+    b = params['b']
+    return 2/b
+
 def beam_radius(z, params):
-    omega0 = params['omega0']
-    zR = params['zR']
+    b = params['b']
+    zR = b/2
+    omega0 = evalOmega0(params)
     return omega0 * np.sqrt(1+(z/zR)**2)
 
 def dBeam_radius_dz(z, params):
-    omega0 = params['omega0']
-    zR = params['zR']
+    omega0 = evalOmega0(params)
+    b = params['b']
+    zR = b/2
     return omega0 * (z/(zR**2)) / np.sqrt(1+(z/zR)**2)
 
 def peak_intensity_355(params):
-    omega0 = params['omega0']
+    omega0 = evalOmega0(params)
     energy = params['energy']
     duration = params['duration'] # [J] / (([m]^2) * [s]) = [W/m^2]
     return energy / ((np.pi * omega0**2) * duration)
@@ -61,23 +71,26 @@ def peak_amplitude_355(params):
     return np.sqrt(peak_intensity_355(params) / (2 * c * eps_0))
     
 def amplitude_355(r,z, params):
-    omega0 = params['omega0']
+    omega0 = evalOmega0(params)
     return peak_amplitude_355(params) * (omega0) /(beam_radius(z, params))*np.exp(-r**2/beam_radius(z,params)**2)
             
 def dAmplitude_355_dz(z, params):
-    omega0 = params['omega0']
+    omega0 = evalOmega0(params)
     return -peak_amplitude_355(params) *(omega0) * dBeam_radius_dz(z, params) / (beam_radius(z, params)**2) 
 
-def evalRef(x,dk,params):
+def evalRef(x,params):
     b= params['b']
+    dk = evalDeltaK(params)
     return (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2)* np.cos(dk*x)+(1/(1+ (2*x/b)**2)**2) * (2*(2*x/b))*np.sin(dk*x)
-def evalImf(x,dk,params):
+def evalImf(x,params):
     b= params['b']
+    dk = evalDeltaK(params)
     return (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2)*np.sin(dk*x) - (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b)))*np.cos(dk*x)
 
-def ReJ3(z,z0,dk,params): # Returns the integral of the real part of J_3 from boyd 2.10.3
+def ReJ3(z,z0,params): # Returns the integral of the real part of J_3 from boyd 2.10.3
     #dk is phase mismatch, delta k
     b= params['b']
+    dk = evalDeltaK(params)
     Ref1 = lambda x: (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2) #times cos(dk*x)
     Ref2 = lambda x: (1/(1+ (2*x/b)**2)**2) * (2*(2*x/b)) #times sin(dk*x)                                 
     I1 = scint.quad(Ref1,z0,z,weight ='cos',wvar = dk,epsabs = 1e-6,epsrel=1e-8,limit =8000)
@@ -85,9 +98,10 @@ def ReJ3(z,z0,dk,params): # Returns the integral of the real part of J_3 from bo
     Itot = I1[0]+I2[0]
     return Itot
 
-def ImJ3(z,z0,dk,params):# Returns the integral of the real part of J_3 from boyd 2.10.3\
+def ImJ3(z,z0,params):# Returns the integral of the real part of J_3 from boyd 2.10.3\
     #dk is phase mismatch, delta k
     b= params['b']
+    dk = evalDeltaK(params)
     Imf1 = lambda x: (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2) #times sin(dk*x)
     Imf2 = lambda x: (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b))) #times *np.cos(dk*x)) 
     I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk,epsabs = 1e-6,epsrel=1e-8)
@@ -95,19 +109,20 @@ def ImJ3(z,z0,dk,params):# Returns the integral of the real part of J_3 from boy
     Itot= I1[0]-I2[0]
     return Itot
 
-def evalPhi3(z,z0,dk,params):
+def evalPhi3(z,z0,params):
     #Calculates the phase of J_3 conjugate from Boyd 2.10.3
     #uses Gaussian quadrature
     b = params['b']
+    dk = evalDeltaK(params)
     complex_f = lambda x: (np.cos(x*dk) + 1j*np.sin(x*dk))/(1+1j*(2*x/b))**2
 
     def Ref(x):
-        return scipy.real(complex_f(x))
+        return complex_f(x).real
     def Imf(x):
-        return scipy.imag(complex_f(x))
+        return complex_f(x).imag
 
-    ReJ = scint.quadrature(Ref,z0,z,rtol = 1e-5,tol =1e-8, maxiter =300)
-    ImJ = scint.quadrature(Imf,z0,z,rtol = 1e-5,tol =1e-8, maxiter =300)
+    ReJ = scint.quadrature(Ref,z0,z,rtol = 1e-5,tol =1e-8, maxiter =500)
+    ImJ = scint.quadrature(Imf,z0,z,rtol = 1e-5,tol =1e-8, maxiter =500)
 
     J = complex(ReJ[0],ImJ[0])
     return -cmath.phase(J)
@@ -123,36 +138,36 @@ def phi3_interp(zval,Phi,params):
 
 
 
-def curly_GBNA(Phi,z0,z,amplitudes,params):
+def curly_GBNA(z0,z,amplitudes,params):
     chi3 = params['chi3']
     NXe = params['PXe'] * Torr_to_m3
     k118 = 2*np.pi/(118*10**(-9))
     b = params['b']
-    dk = params['delta_k']
-    omega0 = params['omega0']
+    dk = evalDeltaK(params)
+    omega0 = evalOmega0(params)
     
     [A_118, _] = amplitudes
 
     dA_118_dz = (1/2)*chi3*NXe*k118 * (omega0/beam_radius(z,params))**2 * (peak_amplitude_355(params)**3) \
-    * np.cos(dk*z-2*np.arctan2(2*z/b,1) + phi3_interp(z,Phi,params))\
+    * np.cos(dk*z-2*np.arctan2(2*z/b,1) + evalPhi3(z,z0,params))\
    
     dA_fluo_dz = 0
     
     return [dA_118_dz, dA_fluo_dz]
 
-def curly_GBWA(Phi,z0,z,amplitudes,params):
+def curly_GBWA(z0,z,amplitudes,params):
     chi3 = params['chi3']
     NXe = params['PXe'] * Torr_to_m3
     k118 = 2*np.pi/(118*10**(-9))
     b = params['b']
-    dk = params['delta_k']
-    omega0 = params['omega0']
+    dk = evalDeltaK(params)
+    omega0 = evalOmega0(params)
     alpha = params['alpha']
 
     [A_118, _] = amplitudes
 
     dA_118_dz = (1/2)*chi3*NXe*k118 * (omega0/beam_radius(z,params))**2 * (peak_amplitude_355(params)**3) \
-    * np.cos((dk*z)-2*np.arctan2(2*z/b,1) + phi3_interp(z,Phi,params))\
+    * np.cos((dk*z)-2*np.arctan2(2*z/b,1) + evalPhi3(z,z0,params))\
     -(1/2) * alpha* NXe**2 * A_118
 
     dA_fluo_dz = (1/2) * alpha* NXe**2 * A_118
@@ -164,27 +179,33 @@ def curly_GBWA(Phi,z0,z,amplitudes,params):
 
 def solve_diff_eq(func, params, zrange, init_vals, z_eval,r_eval):
 
-    delta_k = params['delta_k']
     z = params['z']
     r = params['r']
     zsamples = params['zsamples']
     rsamples = params['rsamples']
     zstart = params['zstart']
-    omega0 = params['omega0']
+    b=params['b']
+    omega0 = evalOmega0(params)
 
-    Phi = np.zeros(len(z))
-    i =0
-    for zval in z:
-        Phi[i] = evalPhi3(zval, zstart, delta_k, params) #precomputes Phi 3 (interpolated in diff eq)
-        i += 1
-
+    # Phi = np.zeros(len(z))
+    # i =0
+    # for zval in z:
+    #     Phi[i] = evalPhi3(zval, zstart, params) #precomputes Phi 3 (interpolated in diff eq)
+    #     i += 1
+    # print('b:',b)
+    # print('dk:',evalDeltaK(params))
+    # print('w0:', evalOmega0(params))
     arr_index = 0
     (zstart, zstop) = zrange
-    sol = scint.solve_ivp(functools.partial(func, Phi,zstart+nonzero,params=params), 
-                        zrange, init_vals, t_eval=z_eval,method ='Radau')
+
+    print(b)
+
+    sol = scint.solve_ivp(functools.partial(func,zstart+nonzero,params=params), 
+                        zrange, init_vals, t_eval=z_eval,method ='Radau',atol=10e-8,rtol=1e-4)
+    
     
     #beam_118_array = np.zeros((rsamples,zsamples),np.longdouble)#initalize beam and flourescene arrays
-    fluor_array = np.zeros((rsamples,zsamples),np.longdouble)
+    fluor_array = np.zeros(zsamples,np.longdouble)
 
 
 
@@ -217,6 +238,7 @@ def solve_diff_eq(func, params, zrange, init_vals, z_eval,r_eval):
 
 #########################################################################################################################
 
+
 def scan_parameter_1D_ODE(param_scan_func, params, scan_range):
     """
     param_scan_func: A function of the form 'func(params)'. The function
@@ -232,8 +254,12 @@ def scan_parameter_1D_ODE(param_scan_func, params, scan_range):
         
     new_data = []    
     for param_val in scan_range.data:
+        # print('scan_range.dims[0]: ',scan_range.dims[0])
+        # print('params[scan_range.dims[0]] before: ',params[scan_range.dims[0]])
         params[scan_range.dims[0]] = param_val
+        # print('params[scan_range.dims[0]] after: ',params[scan_range.dims[0]])
         new_data.append(param_scan_func(params=params))
+        # print(new_data)
     
     old_coords = list(new_data[0].dims)
     new_coords = [scan_range] + [new_data[0].coords[key] for key in old_coords]
@@ -254,7 +280,8 @@ def calc_118_and_fluor(params, zrange, init_vals, t_eval):
     
     """
     func = params["func"]
-    omega0 = params['omega0']
+    b = params['b']
+    omega0 = evalOmega0(params)
     zstop = params['zstop']
     initial_vals = params['initial_vals']
     z = params['z']
@@ -283,8 +310,8 @@ def calc_118_and_fluor(params, zrange, init_vals, t_eval):
     #                             'func': func.__name__})
 
     fluorescence = 0
-    print('detected_118.data: ',detected_118)
-    print('detected_118.data type: ',type(detected_118))
+    # print('detected_118.data: ',detected_118)
+    # print('detected_118.data type: ',type(detected_118))
     result = xr.DataArray([detected_118.data, fluorescence],
                         dims='variable',
                         coords={'variable': ['118 signal', 'Fluorescence signal']},
@@ -294,6 +321,8 @@ def calc_118_and_fluor(params, zrange, init_vals, t_eval):
                             't_eval': t_eval,
                             'func': func.__name__})
     return result
+    
+
 
 def scan_builder(func, params, scans):
     """
