@@ -65,13 +65,15 @@ def ReJ3(z,z0,dk,params): # Returns the integral of the real part of J_3 from bo
     #dk is phase mismatch, delta k
     b= params['b']
     Ref = lambda x: (1/(1+ (2*x/b)**2)**2) * ((1-(2*x/b)**2) *np.cos(dk*x) + (2*(2*x/b))*np.sin(dk*x))
-    return scint.quad(Ref,z0,z)
+    return scint.quad(Ref, z0, z, limit=100, epsabs=1e-8, epsrel=1e-8)
+
+
 
 def ImJ3(z,z0,dk,params):# Returns the integral of the real part of J_3 from boyd 2.10.3\
     #dk is phase mismatch, delta k
     b= params['b']
     Imf = lambda x: (1/(1+(2*x/b)**2)**2) * ((1-(2*x/b)**2)*np.sin(dk*x) - (2*(2*x/b))*np.cos(dk*x))
-    return scint.quad(Imf,z0,z)
+    return scint.quad(Imf, z0, z, limit=100, epsabs=1e-8, epsrel=1e-8)
     
 def phi3(z,z0,dk,params): #return the phase of the complex conjugate of J3
     return np.arctan2(-ImJ3(z,z0,dk,params)[0],ReJ3(z,z0,dk,params)[0])
@@ -88,7 +90,7 @@ def dA118_dz_GBNA(r,z0,z,amplitudes,params):
     
     dA_118_dz = (1/2)*chi3*PXe*k118 * (amplitude_355(r,z,params)**3) \
     * np.cos((2*z/b)-2*np.arctan2(2*z/b,1)+phi3(z,z0,2/b,params))\
-     -(dBeam_radius_dz(z, params)/beam_radius(z,params))*(1-((6*r**2)/(beam_radius(z,params))**2))*A_118
+     +(dBeam_radius_dz(z, params)/beam_radius(z,params))*(((6*r**2 - beam_radius(z,params)**2)/(beam_radius(z,params))**2))*A_118
    
     dA_fluo_dz = 0
     
