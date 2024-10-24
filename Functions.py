@@ -329,7 +329,26 @@ def plot_pressure_scan(data, ax, selections=None, norm=True):
     ax.set_title(f"Scanning: Pressure")
     ax.legend()
        
+##################################################################################
 
+def free_space(q1,z):
+    return q1+z
+
+def thin_lens(q1,f):
+    q2 = 1/((1/q1)-(1/f))
+    return q2
+
+def q_to_params(q,params):
+    wavelength = params['lambda']
+    q_inv = 1/q
+    Im_q_inv = q_inv.imag
+    Re_q = q.real
+    omega_final = np.sqrt(-wavelength/(np.pi*Im_q_inv))
+    focus_final = Re_q
+
+    print('positon relative to focus: ',focus_final,'[m]')
+    print("beam spot size: ", omega_final,'[m]')
+    print('Confocal Perameter [m]: ', 2*q.imag)
     
     
     
