@@ -41,28 +41,27 @@ nonzero = 1e-10
 
 #########################################################################################################################
 
-def evalOmega0(params):
-    b = params['b']
+def evalOmega0(b):
     return np.sqrt(lambda_355 * b / (2* np.pi))
 
-def evalDeltaK(params):
-    b = params['b']
+def evalDeltaK(b):
     return 2/b
 
 def beam_radius(z, params):
     b = params['b']
     zR = b/2
-    omega0 = evalOmega0(params)
+    omega0 = evalOmega0(b)
     return omega0 * np.sqrt(1+(z/zR)**2)
 
 def dBeam_radius_dz(z, params):
-    omega0 = evalOmega0(params)
     b = params['b']
+    omega0 = evalOmega0(b)
     zR = b/2
     return omega0 * (z/(zR**2)) / np.sqrt(1+(z/zR)**2)
 
 def peak_intensity_355(params):
-    omega0 = evalOmega0(params)
+    b = params['b']
+    omega0 = evalOmega0(b)
     energy = params['energy']
     duration = params['duration'] # [J] / (([m]^2) * [s]) = [W/m^2]
     return energy / ((np.pi * omega0**2) * duration)
@@ -71,26 +70,28 @@ def peak_amplitude_355(params):
     return np.sqrt(peak_intensity_355(params) / (2 * c * eps_0))
     
 def amplitude_355(r,z, params):
-    omega0 = evalOmega0(params)
+    b = params['b']
+    omega0 = evalOmega0(b)
     return peak_amplitude_355(params) * (omega0) /(beam_radius(z, params))*np.exp(-r**2/beam_radius(z,params)**2)
             
 def dAmplitude_355_dz(z, params):
-    omega0 = evalOmega0(params)
+    b = params['b']
+    omega0 = evalOmega0(b)
     return -peak_amplitude_355(params) *(omega0) * dBeam_radius_dz(z, params) / (beam_radius(z, params)**2) 
 
 def evalRef(x,params):
     b= params['b']
-    dk = evalDeltaK(params)
+    dk = evalDeltaK(b)
     return (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2)* np.cos(dk*x)+(1/(1+ (2*x/b)**2)**2) * (2*(2*x/b))*np.sin(dk*x)
 def evalImf(x,params):
     b= params['b']
-    dk = evalDeltaK(params)
+    dk = evalDeltaK(b)
     return (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2)*np.sin(dk*x) - (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b)))*np.cos(dk*x)
 
 def ReJ3(z,z0,params): # Returns the integral of the real part of J_3 from boyd 2.10.3
     #dk is phase mismatch, delta k
     b= params['b']
-    dk = evalDeltaK(params)
+    dk = evalDeltaK(b)
     Ref1 = lambda x: (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2) #times cos(dk*x)
     Ref2 = lambda x: (1/(1+ (2*x/b)**2)**2) * (2*(2*x/b)) #times sin(dk*x)                                 
     I1 = scint.quad(Ref1,z0,z,weight ='cos',wvar = dk,epsabs = 1e-6,epsrel=1e-8,limit =8000)
@@ -101,7 +102,7 @@ def ReJ3(z,z0,params): # Returns the integral of the real part of J_3 from boyd 
 def ImJ3(z,z0,params):# Returns the integral of the real part of J_3 from boyd 2.10.3\
     #dk is phase mismatch, delta k
     b= params['b']
-    dk = evalDeltaK(params)
+    dk = evalDeltaK(b)
     Imf1 = lambda x: (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2) #times sin(dk*x)
     Imf2 = lambda x: (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b))) #times *np.cos(dk*x)) 
     I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk,epsabs = 1e-6,epsrel=1e-8)
@@ -113,7 +114,7 @@ def evalPhi3(z,z0,params):
     #Calculates the phase of J_3 conjugate from Boyd 2.10.3
     #uses Gaussian quadrature
     b = params['b']
-    dk = evalDeltaK(params)
+    dk = evalDeltaK(b)
     complex_f = lambda x: (np.cos(x*dk) + 1j*np.sin(x*dk))/(1+1j*(2*x/b))**2
 
     def Ref(x):
@@ -121,8 +122,8 @@ def evalPhi3(z,z0,params):
     def Imf(x):
         return complex_f(x).imag
 
-    ReJ = scint.quadrature(Ref,z0,z,rtol = 1e-5,tol =1e-8, maxiter =500)
-    ImJ = scint.quadrature(Imf,z0,z,rtol = 1e-5,tol =1e-8, maxiter =500)
+    ReJ = scint.quadrature(Ref,z0,z,rtol = 1e-5,tol =1e-8, maxiter =10000)
+    ImJ = scint.quadrature(Imf,z0,z,rtol = 1e-5,tol =1e-8, maxiter =10000)
 
     J = complex(ReJ[0],ImJ[0])
     return -cmath.phase(J)
@@ -143,8 +144,8 @@ def curly_GBNA(z0,z,amplitudes,params):
     NXe = params['PXe'] * Torr_to_m3
     k118 = 2*np.pi/(118*10**(-9))
     b = params['b']
-    dk = evalDeltaK(params)
-    omega0 = evalOmega0(params)
+    dk = evalDeltaK(b)
+    omega0 = evalOmega0(b)
     
     [A_118, _] = amplitudes
 
@@ -160,8 +161,8 @@ def curly_GBWA(z0,z,amplitudes,params):
     NXe = params['PXe'] * Torr_to_m3
     k118 = 2*np.pi/(118*10**(-9))
     b = params['b']
-    dk = evalDeltaK(params)
-    omega0 = evalOmega0(params)
+    dk = evalDeltaK(b)
+    omega0 = evalOmega0(b)
     alpha = params['alpha']
 
     [A_118, _] = amplitudes
@@ -185,7 +186,7 @@ def solve_diff_eq(func, params, zrange, init_vals, z_eval,r_eval):
     rsamples = params['rsamples']
     zstart = params['zstart']
     b=params['b']
-    omega0 = evalOmega0(params)
+    omega0 = evalOmega0(b)
 
     # Phi = np.zeros(len(z))
     # i =0
@@ -281,7 +282,7 @@ def calc_118_and_fluor(params, zrange, init_vals, t_eval):
     """
     func = params["func"]
     b = params['b']
-    omega0 = evalOmega0(params)
+    omega0 = evalOmega0(b)
     zstop = params['zstop']
     initial_vals = params['initial_vals']
     z = params['z']
@@ -368,7 +369,7 @@ def thin_lens(q1,f):
     return q2
 
 def q_to_params(q,params):
-    wavelength = params['lambda']
+    wavelength = lambda_355
     q_inv = 1/q
     Im_q_inv = q_inv.imag
     Re_q = q.real
@@ -379,13 +380,18 @@ def q_to_params(q,params):
     print('positon relative to focus: ',focus_final,'[m]')
     print("beam spot size: ", omega_final,'[m]')
 
-def f_to_b(omega0_initial,b_initial,f,params):
-    wavelength = params['lambda']
+def f_to_b(omega0_initial,f):
+    wavelength = lambda_355
 
-    f = (2*wavelength*omega0_initial)/(2*wavelength*(1+(2*f/b_initial)**2))
+    b_initial = (2*np.pi/ lambda_355)*omega0_initial**2
 
-def b_to_f(omega0_initial,b_initial,b_final,params):
-    wavelength = params['lambda']
+    b_final = 2*lambda_355*f**2/(np.pi*omega0_initial**2)*(1+(2*f/b_initial)**2)
+
+    return b_final
+
+def b_to_f(omega0_initial,b_final):
+    wavelength = lambda_355
+    b_initial = (2*np.pi/ lambda_355)*omega0_initial**2
     r = np.sqrt( (2*wavelength/(np.pi*omega0_initial**2))**2 + 4*(2/b_initial)**2 * (2*wavelength/(np.pi*omega0_initial**2) * b_final)) 
 
     n = -2*wavelength/(np.pi*omega0_initial**2)+r
