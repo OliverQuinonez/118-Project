@@ -374,10 +374,25 @@ def q_to_params(q,params):
     Re_q = q.real
     omega_final = np.sqrt(-wavelength/(np.pi*Im_q_inv))
     focus_final = Re_q
+    
 
     print('positon relative to focus: ',focus_final,'[m]')
     print("beam spot size: ", omega_final,'[m]')
-    print('Confocal Perameter [m]: ', 2*q.imag)
+
+def f_to_b(omega0_initial,b_initial,f,params):
+    wavelength = params['lambda']
+
+    f = (2*wavelength*omega0_initial)/(2*wavelength*(1+(2*f/b_initial)**2))
+
+def b_to_f(omega0_initial,b_initial,b_final,params):
+    wavelength = params['lambda']
+    r = np.sqrt( (2*wavelength/(np.pi*omega0_initial**2))**2 + 4*(2/b_initial)**2 * (2*wavelength/(np.pi*omega0_initial**2) * b_final)) 
+
+    n = -2*wavelength/(np.pi*omega0_initial**2)+r
+
+    frac = n/(2*(2/b_initial)**2 * (2*wavelength/(np.pi*omega0_initial**2)))
+
+    return np.sqrt(frac)
     
     
     
