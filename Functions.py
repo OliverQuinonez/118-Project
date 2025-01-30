@@ -81,32 +81,32 @@ def dAmplitude_355_dz(z, params):
 
 def evalRef(x,params):
     b= params['b']
-    dk = evalDeltaK(b)
+    dk = params['dk']
     return (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2)* np.cos(dk*x)+(1/(1+ (2*x/b)**2)**2) * (2*(2*x/b))*np.sin(dk*x)
 def evalImf(x,params):
     b= params['b']
-    dk = evalDeltaK(b)
+    dk = params['dk']
     return (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2)*np.sin(dk*x) - (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b)))*np.cos(dk*x)
 
 def ReJ3(z,z0,params): # Returns the integral of the real part of J_3 from boyd 2.10.3
     #dk is phase mismatch, delta k
     b= params['b']
-    dk = evalDeltaK(b)
+    dk = params['dk']
     Ref1 = lambda x: (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2) #times cos(dk*x)
     Ref2 = lambda x: (1/(1+ (2*x/b)**2)**2) * (2*(2*x/b)) #times sin(dk*x)                                 
-    I1 = scint.quad(Ref1,z0,z,weight ='cos',wvar = dk,epsabs = 1e-6,epsrel=1e-8,limit =8000)
-    I2 = scint.quad(Ref2,z0,z, weight = 'sin', wvar =dk,epsabs = 1e-6,epsrel=1e-8, limit = 8000)
+    I1 = scint.quad(Ref1,z0,z,weight ='cos',wvar = dk,limit =10000)
+    I2 = scint.quad(Ref2,z0,z, weight = 'sin', wvar =dk, limit = 10000)
     Itot = I1[0]+I2[0]
     return Itot
 
 def ImJ3(z,z0,params):# Returns the integral of the real part of J_3 from boyd 2.10.3\
     #dk is phase mismatch, delta k
     b= params['b']
-    dk = evalDeltaK(b)
+    dk = params['dk']
     Imf1 = lambda x: (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2) #times sin(dk*x)
     Imf2 = lambda x: (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b))) #times *np.cos(dk*x)) 
-    I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk,epsabs = 1e-6,epsrel=1e-8)
-    I2 = scint.quad(Imf2,z0,z, weight = 'cos', wvar = dk,epsabs = 1e-6,epsrel=1e-8)
+    I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk,limit=10000)
+    I2 = scint.quad(Imf2,z0,z, weight = 'cos', wvar = dk,limit = 10000)
     Itot= I1[0]-I2[0]
     return Itot
 
@@ -114,18 +114,20 @@ def evalPhi3(z,z0,params):
     #Calculates the phase of J_3 conjugate from Boyd 2.10.3
     #uses Gaussian quadrature
     b = params['b']
-    dk = evalDeltaK(b)
-    complex_f = lambda x: (np.cos(x*dk) + 1j*np.sin(x*dk))/(1+1j*(2*x/b))**2
+    dk = params['dk']
+    #complex_f = lambda x: (np.cos(x*dk) + 1j*np.sin(x*dk))/(1+1j*(2*x/b))**2
 
-    def Ref(x):
-        return complex_f(x).real
-    def Imf(x):
-        return complex_f(x).imag
+    #def Ref(x):
+        #return complex_f(x).real
+    #def Imf(x):
+        #return complex_f(x).imag
 
-    ReJ = scint.quadrature(Ref,z0,z,rtol = 1e-5,tol =1e-8, maxiter =10000)
-    ImJ = scint.quadrature(Imf,z0,z,rtol = 1e-5,tol =1e-8, maxiter =10000)
+    #ReJ = scint.quad(Ref,z0,z,limit =10000)[0]
+    #ImJ = scint.quad(Imf,z0,z,limit = 10000 )[0]
+    ReJ = ReJ3(z,z0,params)
+    ImJ = ImJ3(z,z0,params)
 
-    J = complex(ReJ[0],ImJ[0])
+    J = complex(ReJ,ImJ)
     return -cmath.phase(J)
 
 def phi3_interp(zval,Phi,params):
@@ -144,7 +146,7 @@ def curly_GBNA(z0,z,amplitudes,params):
     NXe = params['PXe'] * Torr_to_m3
     k118 = 2*np.pi/(118*10**(-9))
     b = params['b']
-    dk = evalDeltaK(b)
+    dk = params['dk']
     omega0 = evalOmega0(b)
     
     [A_118, _] = amplitudes
@@ -161,7 +163,7 @@ def curly_GBWA(z0,z,amplitudes,params):
     NXe = params['PXe'] * Torr_to_m3
     k118 = 2*np.pi/(118*10**(-9))
     b = params['b']
-    dk = evalDeltaK(b)
+    dk =params['dk']
     omega0 = evalOmega0(b)
     alpha = params['alpha']
 
