@@ -34,7 +34,8 @@ omega_118 = lambda_to_freq(lambda_355)  # Hz
 mXe = 2.1801714E-25  # kg
 
 
-k118 = 2*np.pi/(118*10**(-9))
+k118 = 2*np.pi/(118e-9)
+k355 = 2*np.pi/(355e-9)
 
 nonzero = 1e-10
 
