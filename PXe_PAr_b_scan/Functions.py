@@ -82,17 +82,23 @@ def dAmplitude_355_dz(z, params):
 
 def evalRef(x,params):
     b= params['b']
-    dk = params['dk']
+    PXe = params['PXe']
+    PAr =params['PAr']
+    dk = PAr_to_dk(PAr,PXe)
     return (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2)* np.cos(dk*x)+(1/(1+ (2*x/b)**2)**2) * (2*(2*x/b))*np.sin(dk*x)
 def evalImf(x,params):
     b= params['b']
-    dk = params['dk']
+    PXe = params['PXe']
+    PAr =params['PAr']
+    dk = PAr_to_dk(PAr,PXe)
     return (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2)*np.sin(dk*x) - (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b)))*np.cos(dk*x)
 
 def ReJ3(z,z0,params): # Returns the integral of the real part of J_3 from boyd 2.10.3
     #dk is phase mismatch, delta k
     b= params['b']
-    dk = params['dk']
+    PXe = params['PXe']
+    PAr =params['PAr']
+    dk = PAr_to_dk(PAr,PXe)
     Ref1 = lambda x: (1/(1+ (2*x/b)**2)**2) * (1-(2*x/b)**2) #times cos(dk*x)
     Ref2 = lambda x: (1/(1+ (2*x/b)**2)**2) * (2*(2*x/b)) #times sin(dk*x)                                 
     I1 = scint.quad(Ref1,z0,z,weight ='cos',wvar = dk,limit =10000)
@@ -103,7 +109,9 @@ def ReJ3(z,z0,params): # Returns the integral of the real part of J_3 from boyd 
 def ImJ3(z,z0,params):# Returns the integral of the real part of J_3 from boyd 2.10.3\
     #dk is phase mismatch, delta k
     b= params['b']
-    dk = params['dk']
+    PXe = params['PXe']
+    PAr =params['PAr']
+    dk = PAr_to_dk(PAr,PXe)
     Imf1 = lambda x: (1/(1+(2*x/b)**2)**2) * (1-(2*x/b)**2) #times sin(dk*x)
     Imf2 = lambda x: (1/(1+(2*x/b)**2)**2)* (-(2*(2*x/b))) #times *np.cos(dk*x)) 
     I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk,limit=10000)
@@ -115,7 +123,9 @@ def evalPhi3(z,z0,params):
     #Calculates the phase of J_3 conjugate from Boyd 2.10.3
     #uses Gaussian quadrature
     b = params['b']
-    dk = params['dk']
+    PXe = params['PXe']
+    PAr =params['PAr']
+    dk = PAr_to_dk(PAr,PXe)
     #complex_f = lambda x: (np.cos(x*dk) + 1j*np.sin(x*dk))/(1+1j*(2*x/b))**2
 
     #def Ref(x):
@@ -144,10 +154,13 @@ def phi3_interp(zval,Phi,params):
 
 def curly_GBNA(z0,z,amplitudes,params):
     chi3 = params['chi3']
-    NXe = params['PXe'] * Torr_to_m3
+    PXe =params['PXe']
+    NXe =PXe  * Torr_to_m3
+    PAr = params['PAr']
+
     k118 = 2*np.pi/(118*10**(-9))
     b = params['b']
-    dk = params['dk']
+    dk = PAr_to_dk(PAr,PXe)
     omega0 = evalOmega0(b)
     
     [A_118, _] = amplitudes
@@ -161,11 +174,15 @@ def curly_GBNA(z0,z,amplitudes,params):
 
 def curly_GBWA(z0,z,amplitudes,params):
     chi3 = params['chi3']
-    NXe = params['PXe'] * Torr_to_m3
+    PXe =params['PXe']
+    NXe =PXe  * Torr_to_m3
+    PAr = params['PAr']
+
     k118 = 2*np.pi/(118*10**(-9))
     b = params['b']
-    dk =params['dk']
+    dk = PAr_to_dk(PAr,PXe)
     omega0 = evalOmega0(b)
+
     alpha = params['alpha']
 
     [A_118, _] = amplitudes
@@ -202,7 +219,8 @@ def solve_diff_eq(func, params, zrange, init_vals, z_eval,r_eval):
     arr_index = 0
     (zstart, zstop) = zrange
 
-    print(b)
+    print("(PXe,PAr,f)"," (", params['PXe']," , ",params['PAr'], " , ", b_to_f(0.5e-2,params["b"])," )")
+    #print(dk_to_PAr(dk))
 
     sol = scint.solve_ivp(functools.partial(func,zstart+nonzero,params=params), 
                         zrange, init_vals, t_eval=z_eval,method ='Radau',atol=10e-8,rtol=1e-4)

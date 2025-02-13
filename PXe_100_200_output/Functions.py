@@ -402,23 +402,6 @@ def b_to_f(omega0_initial,b_final):
     frac = n/(2*(2/b_initial)**2 * (2*wavelength/(np.pi*omega0_initial**2)))
 
     return np.sqrt(frac)
-
-def dk_to_PAr(dk,PXe):
-    CXe= -6.12E-21 #m^2
-    CAr = 5.33E-22 #m^2
-    NXe= PXe*Torr_to_m3
-    NAr = (dk - NXe*CXe)/CAr
-    return NAr/Torr_to_m3
-
-def PAr_to_dk(PAr,PXe):
-    CXe= -6.12E-21 #m^2
-    CAr = 5.33E-22 #m^2
-    NAr = PAr*Torr_to_m3
-    NXe = PXe*Torr_to_m3
-
-    dk = CXe*NXe+CAr*NAr
-
-    return dk
     
     
     

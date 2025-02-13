@@ -14,14 +14,9 @@ import cmath
 from Functions import *
 
 
-import pm_10Torr
-import pm_25Torr
-import pm_50Torr
-import pm_75Torr
-import pm_100Torr
 
-pm_10Torr
-pm_25Torr
-pm_50Torr
-pm_75Torr
-pm_100Torr
+import cluster_b_dk_scan_zoomedIn
+import cluster_b_dk_scan_zoomedOut
+
+cluster_b_dk_scan_zoomedIn
+cluster_b_dk_scan_zoomedOut

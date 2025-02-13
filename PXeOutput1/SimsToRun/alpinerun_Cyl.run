@@ -33,4 +33,4 @@ module load anaconda
 conda activate TommySims
 
 
-python RunSimsPxe.py > SimOutput.txt
+python RunSimsPxe.py > PXeSimOutput.txt

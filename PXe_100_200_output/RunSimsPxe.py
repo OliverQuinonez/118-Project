@@ -14,14 +14,12 @@ import cmath
 from Functions import *
 
 
-import pm_10Torr
-import pm_25Torr
-import pm_50Torr
-import pm_75Torr
-import pm_100Torr
+import Cluster_b_dk_Pxe125torr_scan
+import Cluster_b_dk_Pxe150torr_scan
+import Cluster_b_dk_Pxe175torr_scan
+import Cluster_b_dk_Pxe187torr_scan
 
-pm_10Torr
-pm_25Torr
-pm_50Torr
-pm_75Torr
-pm_100Torr
+Cluster_b_dk_Pxe125torr_scan
+Cluster_b_dk_Pxe150torr_scan
+Cluster_b_dk_Pxe175torr_scan
+Cluster_b_dk_Pxe187torr_scan

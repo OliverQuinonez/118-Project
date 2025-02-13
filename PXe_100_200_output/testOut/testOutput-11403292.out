@@ -1,0 +1,7 @@
+Running on node...
+c3cpu-c11-u1-1.rc.int.colorado.edu
+
+EnvironmentNameNotFound: Could not find conda environment: TommySims
+You can list all discoverable environments with `conda info --envs`.
+
+

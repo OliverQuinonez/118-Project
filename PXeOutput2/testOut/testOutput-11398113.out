@@ -1,0 +1,8 @@
+Running on node...
+c3cpu-c15-u3-3.rc.int.colorado.edu
+
+EnvironmentNameNotFound: Could not find conda environment: TommySims
+You can list all discoverable environments with `conda info --envs`.
+
+
+python: can't open file '/projects/olqu1783/SimsToRun/RunPXeSims.py': [Errno 2] No such file or directory
