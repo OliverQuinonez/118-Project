@@ -39,7 +39,7 @@ rsamples = 10000
 r = np.linspace(0,rstop,rsamples,dtype = np.longdouble)
 
 
-sol_params_WA = {'func': curly_GBWA,
+sol_params_WA = {'func': curly_GBNA,
               'initial_vals': (nonzero, nonzero),
               'zstart': zstart,
               'zstop': zstop,
@@ -104,5 +104,5 @@ scanned_WA = scan_WA(params=params_WA)
 # scan_NA = scan_builder(single_func, params_WA, [PXe_scan,dk_scan,b_scan])
 # scanned_NA = scan_NA(params=params_NA)
 
-np.save("GBWA_Test",scanned_WA.data)
+np.save("GBNA_Test",scanned_WA.data)
 # np.save("GBNA_Test.npy",scanned_NA.data)
