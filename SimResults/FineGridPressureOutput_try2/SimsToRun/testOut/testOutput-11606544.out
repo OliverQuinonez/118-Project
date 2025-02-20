@@ -1,0 +1,8 @@
+Running on node...
+c3cpu-c15-u5-3.rc.int.colorado.edu
+
+EnvironmentNameNotFound: Could not find conda environment: TommySims
+You can list all discoverable environments with `conda info --envs`.
+
+
+slurmstepd: error: *** JOB 11606544 ON c3cpu-c15-u5-3 CANCELLED AT 2025-02-14T00:31:52 ***

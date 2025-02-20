@@ -1,0 +1,14 @@
+Running on node...
+c3cpu-c15-u1-3.rc.int.colorado.edu
+
+EnvironmentNameNotFound: Could not find conda environment: TommySims
+You can list all discoverable environments with `conda info --envs`.
+
+
+Traceback (most recent call last):
+  File "/projects/olqu1783/0SimsToRun/RunSims.py", line 18, in <module>
+    import GBWA
+  File "/projects/olqu1783/0SimsToRun/GBWA.py", line 32, in <module>
+    rstop = 10*omega0
+               ^^^^^^
+NameError: name 'omega0' is not defined

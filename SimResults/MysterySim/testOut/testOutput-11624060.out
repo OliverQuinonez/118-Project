@@ -1,0 +1,17 @@
+Running on node...
+c3cpu-c15-u1-1.rc.int.colorado.edu
+
+EnvironmentNameNotFound: Could not find conda environment: TommySims
+You can list all discoverable environments with `conda info --envs`.
+
+
+/projects/olqu1783/0SimsToRun/Functions.py:117: IntegrationWarning: The integral is probably divergent, or slowly convergent.
+  I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk,limit=10000)
+/projects/olqu1783/0SimsToRun/Functions.py:105: IntegrationWarning: The integral is probably divergent, or slowly convergent.
+  I2 = scint.quad(Ref2,z0,z, weight = 'sin', wvar =dk, limit = 10000)
+/projects/olqu1783/0SimsToRun/Functions.py:117: IntegrationWarning: The integral is probably divergent, or slowly convergent.
+  I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk,limit=10000)
+/projects/olqu1783/0SimsToRun/Functions.py:105: IntegrationWarning: The integral is probably divergent, or slowly convergent.
+  I2 = scint.quad(Ref2,z0,z, weight = 'sin', wvar =dk, limit = 10000)
+/projects/olqu1783/0SimsToRun/Functions.py:117: IntegrationWarning: The integral is probably divergent, or slowly convergent.
+  I1 = scint.quad(Imf1,z0,z, weight = 'sin', wvar = dk,limit=10000)
