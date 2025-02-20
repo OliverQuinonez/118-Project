@@ -1,0 +1,2 @@
+This scan is to make the previous crude figure better. I will run each set of b,pxe params indepenently because they each require different
+argon pressures.
