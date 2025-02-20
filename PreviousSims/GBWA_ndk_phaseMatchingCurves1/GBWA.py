@@ -86,7 +86,7 @@ PAr_scan = xr.DataArray(PAr_int,
                      attrs = {'units': 'Torr',
                               'long_name': "Partial Argon Pressure"})
 
-scan_WA = scan_builder(single_func, params_WA, [PAr_scan,PXe_scan,b_scan])
+scan_WA = scan_builder(single_func, params_WA, [PXe_scan,PAr_scan,b_scan])
 
 scanned_WA = scan_WA(params=params_WA)
 
