@@ -79,5 +79,5 @@ scanned_WA = scan_WA(params=params_WA)
 # scan_NA = scan_builder(single_func, params_WA, [PXe_scan,dk_scan,b_scan])
 # scanned_NA = scan_NA(params=params_NA)
 
-np.save("dk_f_20cm_Pxe_3Torr.npy",scanned_WA.data)
+np.save("dk_f_50cm_Pxe_3Torr.npy",scanned_WA.data)
 # np.save("GBNA_Test.npy",scanned_NA.data)

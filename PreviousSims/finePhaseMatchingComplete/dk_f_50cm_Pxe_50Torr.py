@@ -51,13 +51,19 @@ single_func = functools.partial(calc_118_and_fluor,
                                 init_vals=[1e-10,1e-10,1e-10],
                                 t_eval=z)
 
-PAr_int = np.linspace(500,600,10)
+PAr_int = np.linspace(370,600,230)
 PAr_scan = xr.DataArray(PAr_int,
                      dims = 'PAr',
                      attrs = {'units': 'Torr',
                               'long_name': "Partial Argon Pressure"})
 
-scan_WA = scan_builder(single_func, params_WA, [PAr_scan])
+PXe_int = np.array([35,50])
+PXe_scan = xr.DataArray(PXe_int,
+                     dims = 'PXe',
+                     attrs = {'units': 'Torr',
+                              'long_name': "Partial Xenon Pressure"})
+
+scan_WA = scan_builder(single_func, params_WA, [PAr_scan,PXe_scan])
 
 scanned_WA = scan_WA(params=params_WA)
 
@@ -65,19 +71,19 @@ scanned_WA = scan_WA(params=params_WA)
 
 
 
-# sol_params_NA = {'func': curly_GBNA,
-#               'initial_vals': (nonzero, nonzero),
-#               'zstart': zstart,
-#               'zstop': zstop,
-#               'zsamples': zsamples,
-#               'z': z,
-#               'r': r,
-#               'rstop': rstop,
-#               'rsamples': rsamples}
+sol_params_NA = {'func': curly_GBNA,
+              'initial_vals': (nonzero, nonzero),
+              'zstart': zstart,
+              'zstop': zstop,
+              'zsamples': zsamples,
+              'z': z,
+              'r': r,
+              'rstop': rstop,
+              'rsamples': rsamples}
 
-# params_NA = {**pulse_params, **harm_params, **sol_params_NA}
-# scan_NA = scan_builder(single_func, params_WA, [PXe_scan,dk_scan,b_scan])
-# scanned_NA = scan_NA(params=params_NA)
+params_NA = {**pulse_params, **harm_params, **sol_params_NA}
+scan_NA = scan_builder(single_func, params_WA, [PAr_scan,PXe_scan])
+scanned_NA = scan_NA(params=params_NA)
 
 np.save("dk_f_50cm_Pxe_50Torr.npy",scanned_WA.data)
-# np.save("GBNA_Test.npy",scanned_NA.data)
+np.save("NA_dk_f_50cm_Pxe_50Torr.npy",scanned_NA.data)

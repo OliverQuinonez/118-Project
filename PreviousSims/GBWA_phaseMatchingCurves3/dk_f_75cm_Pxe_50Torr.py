@@ -15,7 +15,7 @@ from Functions import *
 
 
 
-pulse_params = {'b' : f_to_b(omega0_355,50e-2),            # [m] confocal parameter
+pulse_params = {'b' : f_to_b(omega0_355,75e-2),            # [m] confocal parameter
             'energy' : 17e-3,       # [J] single pulse energy original
             'duration' : 7e-9,       # [s] single pulse length
             'PXe':50,
@@ -79,5 +79,5 @@ scanned_WA = scan_WA(params=params_WA)
 # scan_NA = scan_builder(single_func, params_WA, [PXe_scan,dk_scan,b_scan])
 # scanned_NA = scan_NA(params=params_NA)
 
-np.save("dk_f_50cm_Pxe_50Torr.npy",scanned_WA.data)
+np.save("dk_f_75cm_Pxe_50Torr.npy",scanned_WA.data)
 # np.save("GBNA_Test.npy",scanned_NA.data)

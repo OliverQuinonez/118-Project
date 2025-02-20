@@ -1,0 +1,36 @@
+#!/bin/bash
+# This is a sample slurm job script for the CU Alpine cluster
+
+# A name for this job
+#SBATCH -J Test
+
+# Number of processor cores required
+#SBATCH -n 1
+
+# Number of nodes to run on. 
+#SBATCH -N 1
+
+# How much RAM the job will require.  Make sure this is large enough, 
+# or the job will likely fail.  If you're not sure, estimate high.
+#SBATCH --mem=8G
+
+# Maximum expected wall time this job will require
+# Format is DD-HH:MM:SS
+#SBATCH -t 01-00:00:00
+
+#SBATCH --output=./testOut/testOutput-%j.out
+
+# Lines after this will be executed as if typed on a command line.
+# This script is executed from the directory you submitted your job from;
+
+# You should make sure the appropriate environment module is loaded
+# for the software you want to use: this is the "module load" command.
+
+echo "Running on node..."
+uname -n
+
+module load anaconda
+conda activate TommySims
+
+
+python RunSims.py > SimOutput.txt

@@ -18,7 +18,7 @@ from Functions import *
 pulse_params = {'b' : f_to_b(omega0_355,75e-2),            # [m] confocal parameter
             'energy' : 17e-3,       # [J] single pulse energy original
             'duration' : 7e-9,       # [s] single pulse length
-            'PXe':50,
+            'PXe':3,
             'PAr':25*11.5}    
 harm_params = {'alpha' : 8.20839154e-48, #value from fit 'alpha' : 8.20839154e-48,
             'chi3' : 1.5e-35}   #value from fit: 1.5e-35
@@ -51,7 +51,7 @@ single_func = functools.partial(calc_118_and_fluor,
                                 init_vals=[1e-10,1e-10,1e-10],
                                 t_eval=z)
 
-PAr_int = np.linspace(0,700,20)
+PAr_int = np.linspace(10,50,10)
 PAr_scan = xr.DataArray(PAr_int,
                      dims = 'PAr',
                      attrs = {'units': 'Torr',
@@ -79,5 +79,5 @@ scanned_WA = scan_WA(params=params_WA)
 # scan_NA = scan_builder(single_func, params_WA, [PXe_scan,dk_scan,b_scan])
 # scanned_NA = scan_NA(params=params_NA)
 
-np.save("dk_f_75cm_Pxe_50Torr.npy",scanned_WA.data)
+np.save("dk_f_75cm_Pxe_3Torr.npy",scanned_WA.data)
 # np.save("GBNA_Test.npy",scanned_NA.data)
